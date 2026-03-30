@@ -1,4 +1,7 @@
-this is a python script that extracts chords from audio files. it's basically a wrapper around chord-extractor (which is itself a wrapper around Chordino). It uses [chord-extractor](https://github.com/ohollo/chord-extractor) to extract chords from local audio files (or downloaded them from youtube videos using `yt-dlp` if a youtube link is provided). The extracted chords are then displayed using [tombatossals/react-chords](https://github.com/tombatossals/react-chords) + [tombatossals/chords-db](https://github.com/tombatossals/chords-db).
+this is a python script that extracts chords from audio files. it's basically a wrapper around [chord-extractor](https://github.com/ohollo/chord-extractor) (which is itself using [Chordino and NNLS Chroma
+](https://isophonics.net/nnls-chroma)). 
+
+This can extract chords from local audio files (or downloaded them from youtube videos using `yt-dlp` if a youtube link is provided). The extracted chords are then displayed using [tombatossals/react-chords](https://github.com/tombatossals/react-chords) + [tombatossals/chords-db](https://github.com/tombatossals/chords-db).
 
 it works for me. i really HOPE it works for you too :] 
 
@@ -13,7 +16,7 @@ python chord.py "https://music.youtube.com/watch?v=pRVM5oy_9Fg"
 
 # Requirements
 
-- python 3.8.20 (for chord extraction via chord-extractor)
+- python 3.8.20 (for chord-extractor)
 - [chord-extractor](https://github.com/ohollo/chord-extractor) and its requirements
 - https://code.soundsoftware.ac.uk/projects/vamp-plugin-pack/files to install `Chordino and NNLS Chroma` plugins
 - for youtube downloads:
