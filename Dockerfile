@@ -29,30 +29,43 @@ WORKDIR /app
 # - libsndfile1: Required for audio file handling
 # - ffmpeg: Required for audio/video conversion
 # - ca-certificates: For HTTPS connections
-# - curl: For downloading Vamp plugins
+# - wget: For downloading
+# - build-essential: For compiling C/C++ code
+# - pkg-config: For finding libraries during compilation
+# - libvamp-sdk-dev: Vamp SDK development files
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libsndfile1 \
     ffmpeg \
     ca-certificates \
-    curl \
     wget \
+    build-essential \
+    pkg-config \
+    libtool \
+    automake \
+    autoconf \
     && rm -rf /var/lib/apt/lists/*
 
 # Create Vamp plugin directory
 RUN mkdir -p /usr/local/lib/vamp
 
-# Download and install Vamp plugins from official GitHub releases
-# Using v2.0 from https://github.com/vamp-plugins/vamp-plugin-pack/releases/tag/v2.0
+# Download, extract, and build Vamp Plugin Pack from source
+# Using v2.0 from https://github.com/vamp-plugins/vamp-plugin-pack/archive/refs/tags/v2.0.tar.gz
 RUN cd /tmp && \
-    echo "Downloading Vamp Plugin Pack v2.0 (Linux 64-bit)..." && \
-    wget -q https://github.com/vamp-plugins/vamp-plugin-pack/releases/download/v2.0/vamp-plugin-pack-2.0-linux64.tar.bz2 -O vamp-plugins.tar.bz2 && \
-    echo "Extracting plugins..." && \
-    tar -xjf vamp-plugins.tar.bz2 && \
-    echo "Installing .so files to /usr/local/lib/vamp..." && \
-    find vamp-plugin-pack-2.0-linux64 -name "*.so" -exec cp {} /usr/local/lib/vamp/ \; && \
+    echo "Downloading Vamp Plugin Pack v2.0 source..." && \
+    wget -q https://github.com/vamp-plugins/vamp-plugin-pack/archive/refs/tags/v2.0.tar.gz -O vamp-plugin-pack-2.0.tar.gz && \
+    echo "Extracting source..." && \
+    tar -xzf vamp-plugin-pack-2.0.tar.gz && \
+    cd vamp-plugin-pack-2.0 && \
+    echo "Configuring build..." && \
+    ./configure --prefix=/usr/local && \
+    echo "Building plugins..." && \
+    make && \
+    echo "Installing plugins..." && \
+    make install && \
     echo "Verifying installed plugins..." && \
     ls -la /usr/local/lib/vamp/ && \
-    rm -rf vamp-plugins.tar.bz2 vamp-plugin-pack-2.0-linux64
+    cd /tmp && \
+    rm -rf vamp-plugin-pack-2.0.tar.gz vamp-plugin-pack-2.0
 
 # Set VAMP_PATH environment variable to ensure plugins are found
 ENV VAMP_PATH=/usr/local/lib/vamp
