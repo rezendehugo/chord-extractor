@@ -30,7 +30,6 @@ WORKDIR /app
 # - ffmpeg: Required for audio/video conversion
 # - ca-certificates: For HTTPS connections
 # - curl: For downloading Vamp plugins
-# - libc6: C library (usually present but ensuring)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libsndfile1 \
     ffmpeg \
@@ -42,18 +41,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Create Vamp plugin directory
 RUN mkdir -p /usr/local/lib/vamp
 
-# Download and install Vamp plugins (nnls-chroma and chordino)
-# Using pre-compiled Linux 64-bit binaries from vamp-plugins.org
+# Download and install Vamp plugins from official GitHub releases
+# Using v2.0 from https://github.com/vamp-plugins/vamp-plugin-pack/releases/tag/v2.0
 RUN cd /tmp && \
-    echo "Downloading Vamp Plugin Pack..." && \
-    wget -q https://vamp-plugins.org/download/vamp-plugin-pack-2.7.1-linux64.tar.bz2 -O vamp-plugins.tar.bz2 && \
+    echo "Downloading Vamp Plugin Pack v2.0 (Linux 64-bit)..." && \
+    wget -q https://github.com/vamp-plugins/vamp-plugin-pack/releases/download/v2.0/vamp-plugin-pack-2.0-linux64.tar.bz2 -O vamp-plugins.tar.bz2 && \
     echo "Extracting plugins..." && \
     tar -xjf vamp-plugins.tar.bz2 && \
     echo "Installing .so files to /usr/local/lib/vamp..." && \
-    find vamp-plugin-pack-2.7.1-linux64 -name "*.so" -exec cp {} /usr/local/lib/vamp/ \; && \
-    echo "Verifying nnls-chroma plugin..." && \
+    find vamp-plugin-pack-2.0-linux64 -name "*.so" -exec cp {} /usr/local/lib/vamp/ \; && \
+    echo "Verifying installed plugins..." && \
     ls -la /usr/local/lib/vamp/ && \
-    rm -rf vamp-plugins.tar.bz2 vamp-plugin-pack-2.7.1-linux64
+    rm -rf vamp-plugins.tar.bz2 vamp-plugin-pack-2.0-linux64
 
 # Set VAMP_PATH environment variable to ensure plugins are found
 ENV VAMP_PATH=/usr/local/lib/vamp
