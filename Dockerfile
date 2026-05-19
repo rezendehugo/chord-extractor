@@ -19,7 +19,7 @@ COPY index.html vite.config.js eslint.config.js ./
 RUN npm run build
 
 
-# Stage 2: Build the Python backend
+# Stage 2: Build the Python backend with Vamp plugins
 # This is the main runtime image
 FROM python:3.8-slim
 
@@ -29,14 +29,38 @@ WORKDIR /app
 # - libsndfile1: Required for audio file handling
 # - ffmpeg: Required for audio/video conversion
 # - libvamp0: Required for VAMP plugin support
+# - vamp-plugin-sdk: Required to build/compile VAMP plugins
+# - libvamp-hostsdk3: Host SDK for VAMP
 # - ca-certificates: For HTTPS connections
+# - curl: For downloading Vamp plugins
+# - build-essential: For compiling plugins if needed
+# - git: For potential source downloads
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libsndfile1 \
     ffmpeg \
     libvamp0 \
+    libvamp-hostsdk3 \
+    vamp-plugin-sdk \
     ca-certificates \
+    curl \
+    build-essential \
+    git \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /app/dist
+
+# Create Vamp plugin directory
+RUN mkdir -p /usr/lib/x86_64-linux-gnu/vamp /usr/local/lib/vamp
+
+# Download and install Vamp plugins (nnls-chroma and chordino)
+# Using the vamp-plugins.org download link as mentioned
+RUN cd /tmp && \
+    curl -L https://vamp-plugins.org/download/vamp-plugin-pack-2.7.1-linux64.tar.bz2 -o vamp-plugins.tar.bz2 && \
+    tar -xjf vamp-plugins.tar.bz2 && \
+    cp vamp-plugin-pack-2.7.1-linux64/*.so /usr/local/lib/vamp/ && \
+    rm -rf vamp-plugins.tar.bz2 vamp-plugin-pack-2.7.1-linux64
+
+# Set VAMP_PATH environment variable to ensure plugins are found
+ENV VAMP_PATH=/usr/local/lib/vamp:/usr/lib/x86_64-linux-gnu/vamp
 
 # Copy Python requirements
 COPY requirements.txt ./
