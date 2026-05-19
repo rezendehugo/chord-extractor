@@ -32,7 +32,7 @@ WORKDIR /app
 # - wget: For downloading
 # - build-essential: For compiling C/C++ code
 # - pkg-config: For finding libraries during compilation
-# - libvamp-sdk-dev: Vamp SDK development files
+# - libtool, automake, autoconf: Build tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libsndfile1 \
     ffmpeg \
@@ -55,17 +55,20 @@ RUN cd /tmp && \
     wget -q https://github.com/vamp-plugins/vamp-plugin-pack/archive/refs/tags/v2.0.tar.gz -O vamp-plugin-pack-2.0.tar.gz && \
     echo "Extracting source..." && \
     tar -xzf vamp-plugin-pack-2.0.tar.gz && \
-    cd vamp-plugin-pack-2.0 && \
+    echo "Listing extracted directory..." && \
+    ls -la /tmp/ | grep vamp && \
+    cd vamp-plugin-pack-v2.0 && \
+    echo "Current directory: $(pwd)" && \
     echo "Configuring build..." && \
     ./configure --prefix=/usr/local && \
-    echo "Building plugins..." && \
+    echo "Building plugins (this may take a few minutes)..." && \
     make && \
     echo "Installing plugins..." && \
     make install && \
     echo "Verifying installed plugins..." && \
     ls -la /usr/local/lib/vamp/ && \
     cd /tmp && \
-    rm -rf vamp-plugin-pack-2.0.tar.gz vamp-plugin-pack-2.0
+    rm -rf vamp-plugin-pack-2.0.tar.gz vamp-plugin-pack-v2.0
 
 # Set VAMP_PATH environment variable to ensure plugins are found
 ENV VAMP_PATH=/usr/local/lib/vamp
